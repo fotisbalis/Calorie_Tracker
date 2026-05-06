@@ -4,7 +4,7 @@ use calorie_tracker;
 
 create table meal (
 	meal_id int auto_increment primary key,
-	meal_date DATE not null,
+	meal_date date not null,
 	calories int not null,
     fat_gr int not null,
     carbs_gr int not null,
