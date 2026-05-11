@@ -4,7 +4,7 @@ use calorie_tracker;
 
 create table meal (
 	meal_id int auto_increment primary key,
-    meal_name varchar(200) not null unique,
+    meal_name varchar(200) not null,
 	meal_date date not null,
 	calories int not null,
     fat_gr int not null,
@@ -36,6 +36,7 @@ where meal_date = CURDATE();
 
 delimiter $$
 
+drop procedure if exists new_saved_meal;
 create procedure new_saved_meal(
 	in p_meal_name varchar(200),
     in p_calories int,
@@ -48,6 +49,7 @@ begin
     values (p_meal_name, p_calories, p_fat_gr, p_carbs_gr, p_protein_gr);
 end $$
 
+drop procedure if exists list_saved_meals;
 create procedure list_saved_meals()
 begin
 	select *
@@ -55,6 +57,7 @@ begin
     order by meal_name;
 end $$
 
+drop procedure if exists add_meal_to_today;
 create procedure add_meal_to_today(
 	in p_meal_name varchar(200),
     in p_calories int,
@@ -67,6 +70,7 @@ begin
     values (p_meal_name, curdate(), p_calories, p_fat_gr, p_carbs_gr, p_protein_gr);
 end $$
 
+drop procedure if exists add_saved_meal_to_today;
 create procedure add_saved_meal_to_today(
     in p_meal_name varchar(200)
 )

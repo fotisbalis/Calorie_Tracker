@@ -1,22 +1,20 @@
 package FotisBalis.CalorieTracker;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
+import java.sql.SQLException;
+
+import FotisBalis.CalorieTracker.model.DatabaseConnection;
+import FotisBalis.CalorieTracker.view.MainMenu;
 
 public class App {
     public static void main(String[] args) {
-        
-    	String url = "jdbc:mysql://127.0.0.1:3306/calorie_tracker";
-        String user = "root";
-        String password = "admin123";
-        
-        try {
-            Connection conn = DriverManager.getConnection(url, user, password);
+        try (Connection conn = DatabaseConnection.getConnection()) {
             System.out.println("Database connection successful.");
-            conn.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             System.out.println("Connection failed.");
             e.printStackTrace();
         }
+
+        MainMenu.main(args);
     }
 }
