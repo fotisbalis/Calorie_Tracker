@@ -1,15 +1,15 @@
 package FotisBalis.CalorieTracker.model;
 
-public class SavedMeal {
-    private final int savedMealId;
+public class TodayMeal {
+    private final int mealId;
     private final String mealName;
     private final double calories;
     private final double fatGr;
     private final double carbsGr;
     private final double proteinGr;
 
-    public SavedMeal(int savedMealId, String mealName, double calories, double fatGr, double carbsGr, double proteinGr) {
-        this.savedMealId = savedMealId;
+    public TodayMeal(int mealId, String mealName, double calories, double fatGr, double carbsGr, double proteinGr) {
+        this.mealId = mealId;
         this.mealName = mealName;
         this.calories = calories;
         this.fatGr = fatGr;
@@ -17,8 +17,8 @@ public class SavedMeal {
         this.proteinGr = proteinGr;
     }
 
-    public int getSavedMealId() {
-        return savedMealId;
+    public int getMealId() {
+        return mealId;
     }
 
     public String getMealName() {

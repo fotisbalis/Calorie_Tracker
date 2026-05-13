@@ -22,8 +22,6 @@ import javax.swing.JTextField;
 import javax.swing.UIManager;
 
 import FotisBalis.CalorieTracker.controller.MealController;
-import FotisBalis.CalorieTracker.model.TodayTotals;
-
 public class MainMenu extends JFrame {
     private final MealController mealController;
 
@@ -50,23 +48,28 @@ public class MainMenu extends JFrame {
 
         JButton addMealButton = new JButton("Add Meal");
         JButton savedMealsButton = new JButton("Saved Meals");
+        JButton macrosButton = new JButton("Macros");
         JButton todayTotalsButton = new JButton("Today's Totals");
         JButton exitButton = new JButton("Exit");
 
         Dimension buttonSize = new Dimension(180, 36);
         configureButton(addMealButton, buttonSize);
         configureButton(savedMealsButton, buttonSize);
+        configureButton(macrosButton, buttonSize);
         configureButton(todayTotalsButton, buttonSize);
         configureButton(exitButton, buttonSize);
 
         addMealButton.addActionListener(e -> showAddMealDialog());
         savedMealsButton.addActionListener(e -> openSavedMealsMenu());
-        todayTotalsButton.addActionListener(e -> showTodayTotalsDialog());
+        macrosButton.addActionListener(e -> openMacroMenu());
+        todayTotalsButton.addActionListener(e -> openTodayMealsMenu());
         exitButton.addActionListener(e -> dispose());
 
         buttonPanel.add(addMealButton);
         buttonPanel.add(Box.createVerticalStrut(12));
         buttonPanel.add(savedMealsButton);
+        buttonPanel.add(Box.createVerticalStrut(12));
+        buttonPanel.add(macrosButton);
         buttonPanel.add(Box.createVerticalStrut(12));
         buttonPanel.add(todayTotalsButton);
         buttonPanel.add(Box.createVerticalStrut(12));
@@ -96,14 +99,18 @@ public class MainMenu extends JFrame {
 
     private void showAddMealDialog() {
         JTextField mealNameField = new JTextField();
+        JTextField quantityField = new JTextField();
         JTextField caloriesField = new JTextField();
         JTextField fatField = new JTextField();
         JTextField carbsField = new JTextField();
         JTextField proteinField = new JTextField();
+        JLabel quantityNoteLabel = new JLabel("* Quantity is required only for adding macros");
 
         JPanel panel = new JPanel(new GridLayout(0, 2, 8, 8));
         panel.add(new JLabel("Meal Name:"));
         panel.add(mealNameField);
+        panel.add(new JLabel("Quantity (gr):"));
+        panel.add(quantityField);
         panel.add(new JLabel("Calories:"));
         panel.add(caloriesField);
         panel.add(new JLabel("Fat (gr):"));
@@ -112,83 +119,113 @@ public class MainMenu extends JFrame {
         panel.add(carbsField);
         panel.add(new JLabel("Protein (gr):"));
         panel.add(proteinField);
+        panel.add(quantityNoteLabel);
+        panel.add(new JLabel(""));
 
-        Object[] options = { "Add To Today", "Save Meal", "Cancel" };
-        int choice = JOptionPane.showOptionDialog(
-            this,
-            panel,
-            "Add Meal",
-            JOptionPane.DEFAULT_OPTION,
-            JOptionPane.PLAIN_MESSAGE,
-            null,
-            options,
-            options[0]
-        );
+        Object[] options = { "Add To Today", "Save Meal", "Save Macros", "Close" };
 
-        if (choice == 2 || choice == JOptionPane.CLOSED_OPTION) {
-            return;
-        }
+        while (true) {
+            int choice = JOptionPane.showOptionDialog(
+                this,
+                panel,
+                "Add Meal",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                options,
+                options[0]
+            );
 
-        try {
-            String mealName = mealNameField.getText().trim();
-            validateMealName(mealName);
-
-            int calories = parseIntegerField(caloriesField, "Calories");
-            int fat = parseIntegerField(fatField, "Fat");
-            int carbs = parseIntegerField(carbsField, "Carbs");
-            int protein = parseIntegerField(proteinField, "Protein");
-
-            if (choice == 0) {
-                mealController.addMealToToday(mealName, calories, fat, carbs, protein);
-                showInfoMessage("Meal added to today.");
-            } else if (choice == 1) {
-                mealController.newSavedMeal(mealName, calories, fat, carbs, protein);
-                showInfoMessage("Meal saved.");
+            if (choice == 3 || choice == JOptionPane.CLOSED_OPTION) {
+                return;
             }
-        } catch (IllegalArgumentException ex) {
-            showErrorMessage(ex.getMessage());
-        } catch (SQLException ex) {
-            showErrorMessage("Database error: " + ex.getMessage());
+
+            try {
+                String mealName = mealNameField.getText().trim();
+                validateMealName(mealName);
+
+                double quantity = 0;
+                if (choice == 2) {
+                    quantity = parseDecimalField(quantityField, "Quantity");
+                }
+
+                double calories = parseDecimalField(caloriesField, "Calories");
+                double fat = parseDecimalField(fatField, "Fat");
+                double carbs = parseDecimalField(carbsField, "Carbs");
+                double protein = parseDecimalField(proteinField, "Protein");
+
+                if (choice == 2 && quantity <= 0) {
+                    throw new IllegalArgumentException("Quantity must be greater than 0.");
+                }
+
+                if (choice == 0) {
+                    mealController.addMealToToday(mealName, calories, fat, carbs, protein);
+                    showInfoMessage("Meal added to today.");
+                } else if (choice == 1) {
+                    mealController.newSavedMeal(mealName, calories, fat, carbs, protein);
+                    showInfoMessage("Meal saved.");
+                } else if (choice == 2) {
+                    mealController.newMacros(mealName, quantity, calories, fat, carbs, protein);
+                    showInfoMessage("Macros saved.");
+                }
+            } catch (IllegalArgumentException ex) {
+                showErrorMessage(ex.getMessage());
+            } catch (SQLException ex) {
+                showErrorMessage("Database error: " + ex.getMessage());
+            }
         }
     }
 
     private void openSavedMealsMenu() {
-        SavedMealsMenu savedMealsMenu = new SavedMealsMenu(this);
-        savedMealsMenu.setVisible(true);
-    }
-
-    private void showTodayTotalsDialog() {
         try {
-            TodayTotals totals = mealController.showTodayTotals();
-
-            if (totals == null) {
-                showInfoMessage("No meals found for today.");
+            if (mealController.listSavedMeals().isEmpty()) {
+                showWarningMessage("There are no saved meals to show.");
                 return;
             }
 
-            String message = String.format(
-                "Date: %s%nCalories: %d%nFat: %d gr%nCarbs: %d gr%nProtein: %d gr",
-                totals.getMealDate(),
-                totals.getCalories(),
-                totals.getFat(),
-                totals.getCarbs(),
-                totals.getProtein()
-            );
-
-            showInfoMessage(message);
+            SavedMealsMenu savedMealsMenu = new SavedMealsMenu(this);
+            savedMealsMenu.setVisible(true);
         } catch (SQLException ex) {
             showErrorMessage("Database error: " + ex.getMessage());
         }
     }
 
-    private int parseIntegerField(JTextField field, String fieldName) {
+    private void openMacroMenu() {
+        try {
+            if (mealController.listPer100Foods().isEmpty()) {
+                showWarningMessage("There are no saved macro foods to show.");
+                return;
+            }
+
+            MacroMenu macroMenu = new MacroMenu(this);
+            macroMenu.setVisible(true);
+        } catch (SQLException ex) {
+            showErrorMessage("Database error: " + ex.getMessage());
+        }
+    }
+
+    private void openTodayMealsMenu() {
+        try {
+            if (mealController.listTodayMeals().isEmpty()) {
+                showWarningMessage("There are no meals for today to show.");
+                return;
+            }
+
+            TodayMealsMenu todayMealsMenu = new TodayMealsMenu(this);
+            todayMealsMenu.setVisible(true);
+        } catch (SQLException ex) {
+            showErrorMessage("Database error: " + ex.getMessage());
+        }
+    }
+
+    private double parseDecimalField(JTextField field, String fieldName) {
         String value = field.getText().trim();
         if (value.isEmpty()) {
             throw new IllegalArgumentException(fieldName + " is required.");
         }
 
         try {
-            return Integer.parseInt(value);
+            return Double.parseDouble(value);
         } catch (NumberFormatException ex) {
             throw new IllegalArgumentException(fieldName + " must be a number.");
         }
@@ -202,6 +239,10 @@ public class MainMenu extends JFrame {
 
     private void showInfoMessage(String message) {
         JOptionPane.showMessageDialog(this, message, "Calorie Tracker", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void showWarningMessage(String message) {
+        JOptionPane.showMessageDialog(this, message, "Calorie Tracker", JOptionPane.WARNING_MESSAGE);
     }
 
     private void showErrorMessage(String message) {

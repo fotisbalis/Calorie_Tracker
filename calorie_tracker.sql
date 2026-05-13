@@ -6,20 +6,29 @@ create table meal (
 	meal_id int auto_increment primary key,
     meal_name varchar(200) not null,
 	meal_date date not null,
-	calories int not null,
-    fat_gr int not null,
-    carbs_gr int not null,
-    protein_gr int not null
+	calories decimal(10,2) not null,
+    fat_gr decimal(10,2) not null,
+    carbs_gr decimal(10,2) not null,
+    protein_gr decimal(10,2) not null
 );
 
 create table saved_meal (
 	saved_meal_id int auto_increment primary key,
     meal_name varchar(200) not null unique,
-    calories int not null,
-    fat_gr int not null,
-    carbs_gr int not null,
-    protein_gr int not null
+    calories decimal(10,2) not null,
+    fat_gr decimal(10,2) not null,
+    carbs_gr decimal(10,2) not null,
+    protein_gr decimal(10,2) not null
 );
+
+create table per_100_food (
+	per_100_food_id int auto_increment primary key,
+    food_name varchar(200) not null unique,
+    calories decimal(10,2) not null,
+    fat_gr decimal(10,2) not null,
+    carbs_gr decimal(10,2) not null,
+    protein_gr decimal(10,2) not null
+);	
 
 create view daily_totals as select
 	meal_date,
@@ -36,20 +45,20 @@ where meal_date = CURDATE();
 
 delimiter $$
 
-drop procedure if exists new_saved_meal;
+drop procedure if exists new_saved_meal $$
 create procedure new_saved_meal(
 	in p_meal_name varchar(200),
-    in p_calories int,
-    in p_fat_gr int,
-    in p_carbs_gr int,
-    in p_protein_gr int
+    in p_calories decimal(10,2),
+    in p_fat_gr decimal(10,2),
+    in p_carbs_gr decimal(10,2),
+    in p_protein_gr decimal(10,2)
 )
 begin
     insert into saved_meal(meal_name, calories, fat_gr, carbs_gr, protein_gr)
     values (p_meal_name, p_calories, p_fat_gr, p_carbs_gr, p_protein_gr);
 end $$
 
-drop procedure if exists list_saved_meals;
+drop procedure if exists list_saved_meals $$
 create procedure list_saved_meals()
 begin
 	select *
@@ -57,20 +66,48 @@ begin
     order by meal_name;
 end $$
 
-drop procedure if exists add_meal_to_today;
+drop procedure if exists new_per_100_food $$
+create procedure new_per_100_food(
+	in p_food_name varchar(200),
+    in p_quantity decimal(10,2),
+    in p_calories decimal(10,2),
+    in p_fat_gr decimal(10,2),
+    in p_carbs_gr decimal(10,2),
+    in p_protein_gr decimal(10,2)
+)
+begin
+    insert into per_100_food(food_name, calories, fat_gr, carbs_gr, protein_gr)
+    values (
+        p_food_name,
+        (p_calories / p_quantity) * 100,
+        (p_fat_gr / p_quantity) * 100,
+        (p_carbs_gr / p_quantity) * 100,
+        (p_protein_gr / p_quantity) * 100
+    );
+end $$
+
+drop procedure if exists list_per_100 $$
+create procedure list_per_100()
+begin
+	select *
+    from per_100_food
+    order by food_name;
+end $$
+
+drop procedure if exists add_meal_to_today $$
 create procedure add_meal_to_today(
 	in p_meal_name varchar(200),
-    in p_calories int,
-    in p_fat_gr int,
-    in p_carbs_gr int,
-    in p_protein_gr int
+    in p_calories decimal(10,2),
+    in p_fat_gr decimal(10,2),
+    in p_carbs_gr decimal(10,2),
+    in p_protein_gr decimal(10,2)
 )
 begin
     insert into meal(meal_name, meal_date, calories, fat_gr, carbs_gr, protein_gr)
     values (p_meal_name, curdate(), p_calories, p_fat_gr, p_carbs_gr, p_protein_gr);
 end $$
 
-drop procedure if exists add_saved_meal_to_today;
+drop procedure if exists add_saved_meal_to_today $$
 create procedure add_saved_meal_to_today(
     in p_meal_name varchar(200)
 )
@@ -81,6 +118,25 @@ begin
     where meal_name = p_meal_name;
 end $$
 
+drop procedure if exists add_per_100_food_to_today $$
+create procedure add_per_100_food_to_today(
+    in p_food_name varchar(200),
+    in p_quantity decimal(10,2)
+)
+begin
+    insert into meal(meal_name, meal_date, calories, fat_gr, carbs_gr, protein_gr)
+    select 
+		food_name, 
+		curdate(), 
+        (calories * p_quantity) / 100, 
+        (fat_gr * p_quantity) / 100, 
+        (carbs_gr * p_quantity) / 100, 
+        (protein_gr * p_quantity) / 100
+    from per_100_food
+    where food_name = p_food_name;
+end $$
+
+drop procedure if exists show_today_totals $$
 create procedure show_today_totals()
 begin
     select *

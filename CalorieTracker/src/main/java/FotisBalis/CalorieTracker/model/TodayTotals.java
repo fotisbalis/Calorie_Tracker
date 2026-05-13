@@ -4,12 +4,12 @@ import java.time.LocalDate;
 
 public class TodayTotals {
     private final LocalDate mealDate;
-    private final int calories;
-    private final int fat;
-    private final int carbs;
-    private final int protein;
+    private final double calories;
+    private final double fat;
+    private final double carbs;
+    private final double protein;
 
-    public TodayTotals(LocalDate mealDate, int calories, int fat, int carbs, int protein) {
+    public TodayTotals(LocalDate mealDate, double calories, double fat, double carbs, double protein) {
         this.mealDate = mealDate;
         this.calories = calories;
         this.fat = fat;
@@ -21,19 +21,19 @@ public class TodayTotals {
         return mealDate;
     }
 
-    public int getCalories() {
+    public double getCalories() {
         return calories;
     }
 
-    public int getFat() {
+    public double getFat() {
         return fat;
     }
 
-    public int getCarbs() {
+    public double getCarbs() {
         return carbs;
     }
 
-    public int getProtein() {
+    public double getProtein() {
         return protein;
     }
 }

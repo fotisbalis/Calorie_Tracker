@@ -16,19 +16,20 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import FotisBalis.CalorieTracker.controller.MealController;
-import FotisBalis.CalorieTracker.model.SavedMeal;
+import FotisBalis.CalorieTracker.model.Per100Food;
 
-public class SavedMealsMenu extends JFrame {
+public class MacroMenu extends JFrame {
     private final MealController mealController;
-    private final JPanel mealsPanel;
+    private final JPanel foodsPanel;
 
-    public SavedMealsMenu(JFrame parent) {
+    public MacroMenu(JFrame parent) {
         this.mealController = new MealController();
 
-        setTitle("Saved Meals");
+        setTitle("Macros");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(700, 450);
         setMinimumSize(new Dimension(700, 450));
@@ -37,52 +38,51 @@ public class SavedMealsMenu extends JFrame {
         JPanel mainPanel = new JPanel(new BorderLayout(12, 12));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
 
-        JLabel titleLabel = new JLabel("Saved Meals", SwingConstants.CENTER);
+        JLabel titleLabel = new JLabel("Macros per 100gr", SwingConstants.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
-        mealsPanel = new JPanel();
-        mealsPanel.setLayout(new BoxLayout(mealsPanel, BoxLayout.Y_AXIS));
+        foodsPanel = new JPanel();
+        foodsPanel.setLayout(new BoxLayout(foodsPanel, BoxLayout.Y_AXIS));
 
-        JScrollPane scrollPane = new JScrollPane(mealsPanel);
+        JScrollPane scrollPane = new JScrollPane(foodsPanel);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton closeButton = new JButton("Close");
-
         closeButton.addActionListener(e -> dispose());
 
         bottomPanel.add(closeButton);
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         setContentPane(mainPanel);
-        loadSavedMeals();
+        loadFoods();
     }
 
-    private void loadSavedMeals() {
-        mealsPanel.removeAll();
+    private void loadFoods() {
+        foodsPanel.removeAll();
 
         try {
-            List<SavedMeal> savedMeals = mealController.listSavedMeals();
+            List<Per100Food> foods = mealController.listPer100Foods();
 
-            if (savedMeals.isEmpty()) {
-                JLabel emptyLabel = new JLabel("No saved meals found.", SwingConstants.CENTER);
+            if (foods.isEmpty()) {
+                JLabel emptyLabel = new JLabel("No foods found.", SwingConstants.CENTER);
                 emptyLabel.setAlignmentX(CENTER_ALIGNMENT);
-                mealsPanel.add(emptyLabel);
+                foodsPanel.add(emptyLabel);
             } else {
-                for (SavedMeal savedMeal : savedMeals) {
-                    mealsPanel.add(createMealRow(savedMeal));
+                for (Per100Food food : foods) {
+                    foodsPanel.add(createFoodRow(food));
                 }
             }
         } catch (SQLException ex) {
             showErrorMessage("Database error: " + ex.getMessage());
         }
 
-        mealsPanel.revalidate();
-        mealsPanel.repaint();
+        foodsPanel.revalidate();
+        foodsPanel.repaint();
     }
 
-    private JPanel createMealRow(SavedMeal savedMeal) {
+    private JPanel createFoodRow(Per100Food food) {
         JPanel rowPanel = new JPanel(new BorderLayout(12, 12));
         rowPanel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createEmptyBorder(0, 0, 12, 0),
@@ -93,24 +93,24 @@ public class SavedMealsMenu extends JFrame {
         ));
         rowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 110));
 
-        JLabel nameLabel = new JLabel(savedMeal.getMealName());
+        JLabel nameLabel = new JLabel(food.getFoodName());
         nameLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
         rowPanel.add(nameLabel, BorderLayout.NORTH);
 
         JPanel nutritionPanel = new JPanel(new GridLayout(2, 2, 8, 4));
-        nutritionPanel.add(new JLabel("Calories: " + formatDecimal(savedMeal.getCalories())));
-        nutritionPanel.add(new JLabel("Fat: " + formatDecimal(savedMeal.getFatGr()) + " gr"));
-        nutritionPanel.add(new JLabel("Carbs: " + formatDecimal(savedMeal.getCarbsGr()) + " gr"));
-        nutritionPanel.add(new JLabel("Protein: " + formatDecimal(savedMeal.getProteinGr()) + " gr"));
+        nutritionPanel.add(new JLabel("Calories: " + formatDecimal(food.getCalories())));
+        nutritionPanel.add(new JLabel("Fat: " + formatDecimal(food.getFatGr()) + " gr"));
+        nutritionPanel.add(new JLabel("Carbs: " + formatDecimal(food.getCarbsGr()) + " gr"));
+        nutritionPanel.add(new JLabel("Protein: " + formatDecimal(food.getProteinGr()) + " gr"));
         rowPanel.add(nutritionPanel, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel(new GridLayout(2, 1, 0, 8));
 
         JButton addButton = new JButton("Add To Today's Meals");
-        addButton.addActionListener(e -> addSavedMealToToday(savedMeal));
+        addButton.addActionListener(e -> addFoodToToday(food));
 
         JButton deleteButton = new JButton("Delete");
-        deleteButton.addActionListener(e -> deleteSavedMeal(savedMeal));
+        deleteButton.addActionListener(e -> deleteFood(food));
 
         buttonPanel.add(addButton);
         buttonPanel.add(deleteButton);
@@ -119,25 +119,51 @@ public class SavedMealsMenu extends JFrame {
         return rowPanel;
     }
 
-    private void addSavedMealToToday(SavedMeal savedMeal) {
+    private void addFoodToToday(Per100Food food) {
+        JTextField quantityField = new JTextField();
+
+        JPanel panel = new JPanel(new GridLayout(0, 2, 8, 8));
+        panel.add(new JLabel("Food:"));
+        panel.add(new JLabel(food.getFoodName()));
+        panel.add(new JLabel("Quantity (gr):"));
+        panel.add(quantityField);
+
+        int choice = JOptionPane.showConfirmDialog(
+            this,
+            panel,
+            "Add Per 100g Food",
+            JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (choice != JOptionPane.OK_OPTION) {
+            return;
+        }
+
         try {
-            mealController.addSavedMealToToday(savedMeal.getMealName());
+            double quantity = parseDecimalField(quantityField, "Quantity");
+            if (quantity <= 0) {
+                throw new IllegalArgumentException("Quantity must be greater than 0.");
+            }
+            mealController.addPer100FoodToToday(food.getFoodName(), quantity);
             JOptionPane.showMessageDialog(
                 this,
-                savedMeal.getMealName() + " added to today's meals.",
-                "Saved Meals",
+                food.getFoodName() + " added to today's meals.",
+                "Macros",
                 JOptionPane.INFORMATION_MESSAGE
             );
+        } catch (IllegalArgumentException ex) {
+            showErrorMessage(ex.getMessage());
         } catch (SQLException ex) {
             showErrorMessage("Database error: " + ex.getMessage());
         }
     }
 
-    private void deleteSavedMeal(SavedMeal savedMeal) {
+    private void deleteFood(Per100Food food) {
         int choice = JOptionPane.showConfirmDialog(
             this,
-            "Delete saved meal \"" + savedMeal.getMealName() + "\"?",
-            "Delete Saved Meal",
+            "Delete per 100g food \"" + food.getFoodName() + "\"?",
+            "Delete Macro Food",
             JOptionPane.YES_NO_OPTION,
             JOptionPane.WARNING_MESSAGE
         );
@@ -147,18 +173,31 @@ public class SavedMealsMenu extends JFrame {
         }
 
         try {
-            mealController.deleteSavedMeal(savedMeal.getMealName());
-            loadSavedMeals();
+            mealController.deletePer100Food(food.getFoodName());
+            loadFoods();
         } catch (SQLException ex) {
             showErrorMessage("Database error: " + ex.getMessage());
         }
     }
 
-    private void showErrorMessage(String message) {
-        JOptionPane.showMessageDialog(this, message, "Saved Meals", JOptionPane.ERROR_MESSAGE);
+    private double parseDecimalField(JTextField field, String fieldName) {
+        String value = field.getText().trim();
+        if (value.isEmpty()) {
+            throw new IllegalArgumentException(fieldName + " is required.");
+        }
+
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException(fieldName + " must be a number.");
+        }
     }
 
     private String formatDecimal(double value) {
         return String.format("%.2f", value);
+    }
+
+    private void showErrorMessage(String message) {
+        JOptionPane.showMessageDialog(this, message, "Macros", JOptionPane.ERROR_MESSAGE);
     }
 }

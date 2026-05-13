@@ -1,28 +1,28 @@
 package FotisBalis.CalorieTracker.model;
 
-public class SavedMeal {
-    private final int savedMealId;
-    private final String mealName;
+public class Per100Food {
+    private final int per100FoodId;
+    private final String foodName;
     private final double calories;
     private final double fatGr;
     private final double carbsGr;
     private final double proteinGr;
 
-    public SavedMeal(int savedMealId, String mealName, double calories, double fatGr, double carbsGr, double proteinGr) {
-        this.savedMealId = savedMealId;
-        this.mealName = mealName;
+    public Per100Food(int per100FoodId, String foodName, double calories, double fatGr, double carbsGr, double proteinGr) {
+        this.per100FoodId = per100FoodId;
+        this.foodName = foodName;
         this.calories = calories;
         this.fatGr = fatGr;
         this.carbsGr = carbsGr;
         this.proteinGr = proteinGr;
     }
 
-    public int getSavedMealId() {
-        return savedMealId;
+    public int getPer100FoodId() {
+        return per100FoodId;
     }
 
-    public String getMealName() {
-        return mealName;
+    public String getFoodName() {
+        return foodName;
     }
 
     public double getCalories() {
