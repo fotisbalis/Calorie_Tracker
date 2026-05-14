@@ -27,7 +27,8 @@ create table per_100_food (
     calories decimal(10,2) not null,
     fat_gr decimal(10,2) not null,
     carbs_gr decimal(10,2) not null,
-    protein_gr decimal(10,2) not null
+    protein_gr decimal(10,2) not null,
+    is_favorite boolean not null default false
 );	
 
 create view daily_totals as select
@@ -66,31 +67,20 @@ begin
     order by meal_name;
 end $$
 
-drop procedure if exists new_per_100_food $$
-create procedure new_per_100_food(
-	in p_food_name varchar(200),
-    in p_quantity decimal(10,2),
-    in p_calories decimal(10,2),
-    in p_fat_gr decimal(10,2),
-    in p_carbs_gr decimal(10,2),
-    in p_protein_gr decimal(10,2)
-)
-begin
-    insert into per_100_food(food_name, calories, fat_gr, carbs_gr, protein_gr)
-    values (
-        p_food_name,
-        (p_calories / p_quantity) * 100,
-        (p_fat_gr / p_quantity) * 100,
-        (p_carbs_gr / p_quantity) * 100,
-        (p_protein_gr / p_quantity) * 100
-    );
-end $$
-
 drop procedure if exists list_per_100 $$
 create procedure list_per_100()
 begin
 	select *
     from per_100_food
+    order by food_name;
+end $$
+
+drop procedure if exists list_favorite_per_100 $$
+create procedure list_favorite_per_100()
+begin
+	select *
+    from per_100_food
+    where is_favorite = true
     order by food_name;
 end $$
 
@@ -141,6 +131,15 @@ create procedure show_today_totals()
 begin
     select *
     from today_totals;
+end $$
+
+drop procedure if exists list_favorite_per_100 $$
+create procedure list_favorite_per_100()
+begin
+    select *
+    from per_100_food
+    where is_favorite = true
+    order by food_name;
 end $$
 
 delimiter ;

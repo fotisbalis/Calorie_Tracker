@@ -32,23 +32,6 @@ public class MealController {
         }
     }
     
-    public void newMacros(String mealName, double quantity, double calories, double fatGr, double carbsGr, double proteinGr) throws SQLException {
-        String sql = "{CALL new_per_100_food(?, ?, ?, ?, ?, ?)}";
-
-        try (
-            Connection connection = DatabaseConnection.getConnection();
-            CallableStatement statement = connection.prepareCall(sql)
-        ) {
-            statement.setString(1, mealName);
-            statement.setDouble(2, quantity);
-            statement.setDouble(3, calories);
-            statement.setDouble(4, fatGr);
-            statement.setDouble(5, carbsGr);
-            statement.setDouble(6, proteinGr);
-            statement.execute();
-        }
-    }
-
     public List<SavedMeal> listSavedMeals() throws SQLException {
         String sql = "{CALL list_saved_meals()}";
         List<SavedMeal> savedMeals = new ArrayList<>();
@@ -89,7 +72,33 @@ public class MealController {
                     resultSet.getDouble("calories"),
                     resultSet.getDouble("fat_gr"),
                     resultSet.getDouble("carbs_gr"),
-                    resultSet.getDouble("protein_gr")
+                    resultSet.getDouble("protein_gr"),
+                    resultSet.getBoolean("is_favorite")
+                ));
+            }
+        }
+
+        return foods;
+    }
+
+    public List<Per100Food> listFavoritePer100Foods() throws SQLException {
+        String sql = "{CALL list_favorite_per_100()}";
+        List<Per100Food> foods = new ArrayList<>();
+
+        try (
+            Connection connection = DatabaseConnection.getConnection();
+            CallableStatement statement = connection.prepareCall(sql);
+            ResultSet resultSet = statement.executeQuery()
+        ) {
+            while (resultSet.next()) {
+                foods.add(new Per100Food(
+                    resultSet.getInt("per_100_food_id"),
+                    resultSet.getString("food_name"),
+                    resultSet.getDouble("calories"),
+                    resultSet.getDouble("fat_gr"),
+                    resultSet.getDouble("carbs_gr"),
+                    resultSet.getDouble("protein_gr"),
+                    resultSet.getBoolean("is_favorite")
                 ));
             }
         }
@@ -182,6 +191,19 @@ public class MealController {
             PreparedStatement statement = connection.prepareStatement(sql)
         ) {
             statement.setString(1, foodName);
+            statement.executeUpdate();
+        }
+    }
+
+    public void setPer100FoodFavorite(int per100FoodId, boolean favorite) throws SQLException {
+        String sql = "update per_100_food set is_favorite = ? where per_100_food_id = ?";
+
+        try (
+            Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql)
+        ) {
+            statement.setBoolean(1, favorite);
+            statement.setInt(2, per100FoodId);
             statement.executeUpdate();
         }
     }

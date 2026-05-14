@@ -46,9 +46,9 @@ public class MainMenu extends JFrame {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
 
-        JButton addMealButton = new JButton("Add Meal");
+        JButton addMealButton = new JButton("Add New Meal");
         JButton savedMealsButton = new JButton("Saved Meals");
-        JButton macrosButton = new JButton("Macros");
+        JButton macrosButton = new JButton("Macros Database");
         JButton todayTotalsButton = new JButton("Today's Totals");
         JButton exitButton = new JButton("Exit");
 
@@ -99,18 +99,14 @@ public class MainMenu extends JFrame {
 
     private void showAddMealDialog() {
         JTextField mealNameField = new JTextField();
-        JTextField quantityField = new JTextField();
         JTextField caloriesField = new JTextField();
         JTextField fatField = new JTextField();
         JTextField carbsField = new JTextField();
         JTextField proteinField = new JTextField();
-        JLabel quantityNoteLabel = new JLabel("* Quantity is required only for adding macros");
 
         JPanel panel = new JPanel(new GridLayout(0, 2, 8, 8));
         panel.add(new JLabel("Meal Name:"));
         panel.add(mealNameField);
-        panel.add(new JLabel("Quantity (gr):"));
-        panel.add(quantityField);
         panel.add(new JLabel("Calories:"));
         panel.add(caloriesField);
         panel.add(new JLabel("Fat (gr):"));
@@ -119,10 +115,8 @@ public class MainMenu extends JFrame {
         panel.add(carbsField);
         panel.add(new JLabel("Protein (gr):"));
         panel.add(proteinField);
-        panel.add(quantityNoteLabel);
-        panel.add(new JLabel(""));
 
-        Object[] options = { "Add To Today", "Save Meal", "Save Macros", "Close" };
+        Object[] options = { "Add To Today", "Save Meal", "Close" };
 
         while (true) {
             int choice = JOptionPane.showOptionDialog(
@@ -136,7 +130,7 @@ public class MainMenu extends JFrame {
                 options[0]
             );
 
-            if (choice == 3 || choice == JOptionPane.CLOSED_OPTION) {
+            if (choice == 2 || choice == JOptionPane.CLOSED_OPTION) {
                 return;
             }
 
@@ -144,19 +138,10 @@ public class MainMenu extends JFrame {
                 String mealName = mealNameField.getText().trim();
                 validateMealName(mealName);
 
-                double quantity = 0;
-                if (choice == 2) {
-                    quantity = parseDecimalField(quantityField, "Quantity");
-                }
-
                 double calories = parseDecimalField(caloriesField, "Calories");
                 double fat = parseDecimalField(fatField, "Fat");
                 double carbs = parseDecimalField(carbsField, "Carbs");
                 double protein = parseDecimalField(proteinField, "Protein");
-
-                if (choice == 2 && quantity <= 0) {
-                    throw new IllegalArgumentException("Quantity must be greater than 0.");
-                }
 
                 if (choice == 0) {
                     mealController.addMealToToday(mealName, calories, fat, carbs, protein);
@@ -164,9 +149,6 @@ public class MainMenu extends JFrame {
                 } else if (choice == 1) {
                     mealController.newSavedMeal(mealName, calories, fat, carbs, protein);
                     showInfoMessage("Meal saved.");
-                } else if (choice == 2) {
-                    mealController.newMacros(mealName, quantity, calories, fat, carbs, protein);
-                    showInfoMessage("Macros saved.");
                 }
             } catch (IllegalArgumentException ex) {
                 showErrorMessage(ex.getMessage());
@@ -191,17 +173,8 @@ public class MainMenu extends JFrame {
     }
 
     private void openMacroMenu() {
-        try {
-            if (mealController.listPer100Foods().isEmpty()) {
-                showWarningMessage("There are no saved macro foods to show.");
-                return;
-            }
-
-            MacroMenu macroMenu = new MacroMenu(this);
-            macroMenu.setVisible(true);
-        } catch (SQLException ex) {
-            showErrorMessage("Database error: " + ex.getMessage());
-        }
+        MacroMenu macroMenu = new MacroMenu(this);
+		macroMenu.setVisible(true);
     }
 
     private void openTodayMealsMenu() {
