@@ -17,6 +17,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 import FotisBalis.CalorieTracker.controller.MealController;
@@ -57,6 +58,7 @@ public abstract class MacroFoodsMenu extends JFrame {
         foodsPanel.setLayout(new BoxLayout(foodsPanel, BoxLayout.Y_AXIS));
 
         JScrollPane scrollPane = new JScrollPane(foodsPanel);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -110,9 +112,9 @@ public abstract class MacroFoodsMenu extends JFrame {
                 BorderFactory.createEmptyBorder(12, 12, 12, 12)
             )
         ));
-        rowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 130));
+        rowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
 
-        JLabel nameLabel = new JLabel(food.getFoodName());
+        JLabel nameLabel = new JLabel("<html><body style='width: 520px'>" + food.getFoodName() + "</body></html>");
         nameLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
         rowPanel.add(nameLabel, BorderLayout.NORTH);
 
@@ -123,7 +125,7 @@ public abstract class MacroFoodsMenu extends JFrame {
         nutritionPanel.add(new JLabel("Protein: " + formatDecimal(food.getProteinGr()) + " gr"));
         rowPanel.add(nutritionPanel, BorderLayout.CENTER);
 
-        JPanel buttonPanel = new JPanel(new GridLayout(2, 1, 0, 8));
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 8, 0));
 
         JButton addButton = new JButton("Add To Today's Meals");
         addButton.addActionListener(e -> addFoodToToday(food));
@@ -132,7 +134,7 @@ public abstract class MacroFoodsMenu extends JFrame {
 
         buttonPanel.add(addButton);
         buttonPanel.add(favoriteButton);
-        rowPanel.add(buttonPanel, BorderLayout.EAST);
+        rowPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         return rowPanel;
     }

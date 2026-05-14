@@ -91,7 +91,7 @@ public class SavedMealsMenu extends JFrame {
                 BorderFactory.createEmptyBorder(12, 12, 12, 12)
             )
         ));
-        rowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 110));
+        rowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 130));
 
         JLabel nameLabel = new JLabel(savedMeal.getMealName());
         nameLabel.setFont(new Font("SansSerif", Font.BOLD, 18));

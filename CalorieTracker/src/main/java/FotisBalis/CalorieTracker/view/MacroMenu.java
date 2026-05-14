@@ -3,6 +3,8 @@ package FotisBalis.CalorieTracker.view;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 
 import javax.swing.BorderFactory;
@@ -29,12 +31,8 @@ public class MacroMenu extends JFrame {
         JLabel titleLabel = new JLabel("Macros", SwingConstants.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
 
-        JLabel subtitleLabel = new JLabel("USDA FoodData Central", SwingConstants.CENTER);
-        subtitleLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
-
         JPanel headerPanel = new JPanel(new GridLayout(2, 1, 0, 6));
         headerPanel.add(titleLabel);
-        headerPanel.add(subtitleLabel);
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
@@ -77,7 +75,10 @@ public class MacroMenu extends JFrame {
         contentPanel.add(Box.createVerticalStrut(24));
         contentPanel.add(buttonPanel);
 
-        mainPanel.add(contentPanel, BorderLayout.CENTER);
+        JPanel centerPanel = new JPanel(new GridBagLayout());
+        centerPanel.add(contentPanel, new GridBagConstraints());
+
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
         setContentPane(mainPanel);
     }
 

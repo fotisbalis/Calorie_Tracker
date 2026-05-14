@@ -21,7 +21,7 @@ public class FavoriteMacrosMenu extends MacroFoodsMenu {
 
     @Override
     protected JButton createFavoriteButton(Per100Food food) {
-        JButton favoriteButton = new JButton("Remove Favorite");
+        JButton favoriteButton = new JButton("Remove From Favorites");
         favoriteButton.addActionListener(e ->
             setFavorite(food, false, food.getFoodName() + " removed from favorites.")
         );
