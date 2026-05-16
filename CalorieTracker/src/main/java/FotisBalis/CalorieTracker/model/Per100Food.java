@@ -8,8 +8,9 @@ public class Per100Food {
     private final double carbsGr;
     private final double proteinGr;
     private final boolean favorite;
+    private final boolean manual;
 
-    public Per100Food(int per100FoodId, String foodName, double calories, double fatGr, double carbsGr, double proteinGr, boolean favorite) {
+    public Per100Food(int per100FoodId, String foodName, double calories, double fatGr, double carbsGr, double proteinGr, boolean favorite, boolean manual) {
         this.per100FoodId = per100FoodId;
         this.foodName = foodName;
         this.calories = calories;
@@ -17,6 +18,7 @@ public class Per100Food {
         this.carbsGr = carbsGr;
         this.proteinGr = proteinGr;
         this.favorite = favorite;
+        this.manual = manual;
     }
 
     public int getPer100FoodId() {
@@ -45,5 +47,9 @@ public class Per100Food {
 
     public boolean isFavorite() {
         return favorite;
+    }
+
+    public boolean isManual() {
+        return manual;
     }
 }

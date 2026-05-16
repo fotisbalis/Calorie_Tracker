@@ -11,24 +11,17 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-public class MacroMenu extends JFrame {
+public class MacroMenu extends JPanel {
 
-    public MacroMenu(JFrame parent) {
-        setTitle("Macros");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(420, 320);
-        setLocationRelativeTo(parent);
-        setMinimumSize(new Dimension(500, 420));
+    public MacroMenu(AppNavigator navigator) {
+        setLayout(new BorderLayout(16, 16));
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JPanel mainPanel = new JPanel(new BorderLayout(16, 16));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        JLabel titleLabel = new JLabel("Macros", SwingConstants.CENTER);
+        JLabel titleLabel = new JLabel("Macros Database", SwingConstants.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
 
         JPanel headerPanel = new JPanel(new GridLayout(2, 1, 0, 6));
@@ -38,31 +31,26 @@ public class MacroMenu extends JFrame {
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
 
         JButton allFoodsButton = new JButton("All Foods");
-        JButton favoritesButton = new JButton("Favorite Macros");
-        JButton backButton = new JButton("Back To Main Menu");
+        JButton favoritesButton = new JButton("Favorite Foods");
+        JButton manualFoodsButton = new JButton("Manual Foods");
+        JButton backButton = new JButton("Back");
 
         Dimension buttonSize = new Dimension(200, 38);
         configureButton(allFoodsButton, buttonSize);
         configureButton(favoritesButton, buttonSize);
+        configureButton(manualFoodsButton, buttonSize);
         configureButton(backButton, buttonSize);
 
-        allFoodsButton.addActionListener(e -> {
-            AllMacrosMenu allMacrosMenu = new AllMacrosMenu(parent);
-            allMacrosMenu.setVisible(true);
-            dispose();
-        });
-
-        favoritesButton.addActionListener(e -> {
-            FavoriteMacrosMenu favoriteMacrosMenu = new FavoriteMacrosMenu(parent);
-            favoriteMacrosMenu.setVisible(true);
-            dispose();
-        });
-
-        backButton.addActionListener(e -> dispose());
+        allFoodsButton.addActionListener(e -> navigator.showAllMacros());
+        favoritesButton.addActionListener(e -> navigator.showFavoriteMacros());
+        manualFoodsButton.addActionListener(e -> navigator.showManualMacros());
+        backButton.addActionListener(e -> navigator.goBack());
 
         buttonPanel.add(allFoodsButton);
         buttonPanel.add(Box.createVerticalStrut(12));
         buttonPanel.add(favoritesButton);
+        buttonPanel.add(Box.createVerticalStrut(12));
+        buttonPanel.add(manualFoodsButton);
         buttonPanel.add(Box.createVerticalStrut(12));
         buttonPanel.add(backButton);
 
@@ -78,8 +66,7 @@ public class MacroMenu extends JFrame {
         JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.add(contentPanel, new GridBagConstraints());
 
-        mainPanel.add(centerPanel, BorderLayout.CENTER);
-        setContentPane(mainPanel);
+        add(centerPanel, BorderLayout.CENTER);
     }
 
     private void configureButton(JButton button, Dimension size) {

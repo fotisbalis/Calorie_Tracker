@@ -11,7 +11,6 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -22,22 +21,16 @@ import FotisBalis.CalorieTracker.controller.MealController;
 import FotisBalis.CalorieTracker.model.TodayMeal;
 import FotisBalis.CalorieTracker.model.TodayTotals;
 
-public class TodayMealsMenu extends JFrame {
+public class TodayMealsMenu extends JPanel {
     private final MealController mealController;
     private final JPanel mealsPanel;
     private final JLabel totalsLabel;
 
-    public TodayMealsMenu(JFrame parent) {
+    public TodayMealsMenu(AppNavigator navigator) {
         this.mealController = new MealController();
 
-        setTitle("Today's Meals");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(760, 520);
-        setMinimumSize(new Dimension(760, 520));
-        setLocationRelativeTo(parent);
-
-        JPanel mainPanel = new JPanel(new BorderLayout(12, 12));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+        setLayout(new BorderLayout(12, 12));
+        setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
 
         JPanel headerPanel = new JPanel(new BorderLayout(0, 8));
         JLabel titleLabel = new JLabel("Today's Meals", SwingConstants.CENTER);
@@ -46,21 +39,20 @@ public class TodayMealsMenu extends JFrame {
 
         totalsLabel = new JLabel("", SwingConstants.CENTER);
         headerPanel.add(totalsLabel, BorderLayout.CENTER);
-        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        add(headerPanel, BorderLayout.NORTH);
 
         mealsPanel = new JPanel();
         mealsPanel.setLayout(new BoxLayout(mealsPanel, BoxLayout.Y_AXIS));
 
         JScrollPane scrollPane = new JScrollPane(mealsPanel);
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton closeButton = new JButton("Close");
-        closeButton.addActionListener(e -> dispose());
-        bottomPanel.add(closeButton);
-        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(e -> navigator.goBack());
+        bottomPanel.add(backButton);
+        add(bottomPanel, BorderLayout.SOUTH);
 
-        setContentPane(mainPanel);
         loadTodayMeals();
     }
 

@@ -31,6 +31,23 @@ public class MealController {
             statement.execute();
         }
     }
+
+    public void newPer100Meal(String mealName, double quantity, double calories, double fatGr, double carbsGr, double proteinGr) throws SQLException {
+        String sql = "{CALL new_per_100_meal(?, ?, ?, ?, ?, ?)}";
+
+        try (
+            Connection connection = DatabaseConnection.getConnection();
+            CallableStatement statement = connection.prepareCall(sql)
+        ) {
+            statement.setString(1, mealName);
+            statement.setDouble(2, quantity);
+            statement.setDouble(3, calories);
+            statement.setDouble(4, fatGr);
+            statement.setDouble(5, carbsGr);
+            statement.setDouble(6, proteinGr);
+            statement.execute();
+        }
+    }
     
     public List<SavedMeal> listSavedMeals() throws SQLException {
         String sql = "{CALL list_saved_meals()}";
@@ -73,7 +90,8 @@ public class MealController {
                     resultSet.getDouble("fat_gr"),
                     resultSet.getDouble("carbs_gr"),
                     resultSet.getDouble("protein_gr"),
-                    resultSet.getBoolean("is_favorite")
+                    resultSet.getBoolean("is_favorite"),
+                    resultSet.getBoolean("is_manual")
                 ));
             }
         }
@@ -98,7 +116,34 @@ public class MealController {
                     resultSet.getDouble("fat_gr"),
                     resultSet.getDouble("carbs_gr"),
                     resultSet.getDouble("protein_gr"),
-                    resultSet.getBoolean("is_favorite")
+                    resultSet.getBoolean("is_favorite"),
+                    resultSet.getBoolean("is_manual")
+                ));
+            }
+        }
+
+        return foods;
+    }
+
+    public List<Per100Food> listManualPer100Foods() throws SQLException {
+        String sql = "{CALL list_manual_per_100()}";
+        List<Per100Food> foods = new ArrayList<>();
+
+        try (
+            Connection connection = DatabaseConnection.getConnection();
+            CallableStatement statement = connection.prepareCall(sql);
+            ResultSet resultSet = statement.executeQuery()
+        ) {
+            while (resultSet.next()) {
+                foods.add(new Per100Food(
+                    resultSet.getInt("per_100_food_id"),
+                    resultSet.getString("food_name"),
+                    resultSet.getDouble("calories"),
+                    resultSet.getDouble("fat_gr"),
+                    resultSet.getDouble("carbs_gr"),
+                    resultSet.getDouble("protein_gr"),
+                    resultSet.getBoolean("is_favorite"),
+                    resultSet.getBoolean("is_manual")
                 ));
             }
         }
@@ -172,26 +217,26 @@ public class MealController {
     }
 
     public void deleteSavedMeal(String mealName) throws SQLException {
-        String sql = "delete from saved_meal where meal_name = ?";
+        String sql = "{CALL delete_saved_meal(?)}";
 
         try (
             Connection connection = DatabaseConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql)
+            CallableStatement statement = connection.prepareCall(sql)
         ) {
             statement.setString(1, mealName);
-            statement.executeUpdate();
+            statement.execute();
         }
     }
 
-    public void deletePer100Food(String foodName) throws SQLException {
-        String sql = "delete from per_100_food where food_name = ?";
+    public void deleteManualPer100Food(int per100FoodId) throws SQLException {
+        String sql = "{CALL delete_manual_per_100_food(?)}";
 
         try (
             Connection connection = DatabaseConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql)
+            CallableStatement statement = connection.prepareCall(sql)
         ) {
-            statement.setString(1, foodName);
-            statement.executeUpdate();
+            statement.setInt(1, per100FoodId);
+            statement.execute();
         }
     }
 
@@ -209,14 +254,14 @@ public class MealController {
     }
 
     public void deleteTodayMeal(int mealId) throws SQLException {
-        String sql = "delete from meal where meal_id = ?";
+        String sql = "{CALL delete_today_meal(?)}";
 
         try (
             Connection connection = DatabaseConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql)
+            CallableStatement statement = connection.prepareCall(sql)
         ) {
             statement.setInt(1, mealId);
-            statement.executeUpdate();
+            statement.execute();
         }
     }
 

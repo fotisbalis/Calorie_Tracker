@@ -11,7 +11,6 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -23,60 +22,60 @@ import javax.swing.SwingConstants;
 import FotisBalis.CalorieTracker.controller.MealController;
 import FotisBalis.CalorieTracker.model.Per100Food;
 
-public abstract class MacroFoodsMenu extends JFrame {
+public abstract class MacroFoodsMenu extends JPanel {
     protected final MealController mealController;
-    private final JFrame parentFrame;
+    private final AppNavigator navigator;
+    private final JPanel contentPanel;
     private final JPanel foodsPanel;
     private final String emptyMessage;
+    private final String title;
 
-    protected MacroFoodsMenu(JFrame parent, String title, String emptyMessage) {
+    protected MacroFoodsMenu(AppNavigator navigator, String title, String emptyMessage) {
+        this(navigator, title, "USDA FoodData Central", emptyMessage);
+    }
+
+    protected MacroFoodsMenu(AppNavigator navigator, String title, String subtitle, String emptyMessage) {
         this.mealController = new MealController();
-        this.parentFrame = parent;
+        this.navigator = navigator;
         this.emptyMessage = emptyMessage;
+        this.title = title;
 
-        setTitle(title);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(760, 520);
-        setMinimumSize(new Dimension(760, 520));
-        setLocationRelativeTo(parent);
-
-        JPanel mainPanel = new JPanel(new BorderLayout(12, 12));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+        setLayout(new BorderLayout(12, 12));
+        setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
 
         JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
 
-        JLabel subtitleLabel = new JLabel("USDA FoodData Central", SwingConstants.CENTER);
+        JLabel subtitleLabel = new JLabel(subtitle, SwingConstants.CENTER);
         subtitleLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
         JPanel headerPanel = new JPanel(new GridLayout(2, 1, 0, 4));
         headerPanel.add(titleLabel);
         headerPanel.add(subtitleLabel);
-        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        add(headerPanel, BorderLayout.NORTH);
+
+        contentPanel = new JPanel(new BorderLayout(0, 12));
 
         foodsPanel = new JPanel();
         foodsPanel.setLayout(new BoxLayout(foodsPanel, BoxLayout.Y_AXIS));
 
         JScrollPane scrollPane = new JScrollPane(foodsPanel);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
+        add(contentPanel, BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton backButton = new JButton("Back");
-        JButton closeButton = new JButton("Close");
-
-        backButton.addActionListener(e -> {
-            MacroMenu macroMenu = new MacroMenu(parentFrame);
-            macroMenu.setVisible(true);
-            dispose();
-        });
-        closeButton.addActionListener(e -> dispose());
-
+        backButton.addActionListener(e -> this.navigator.goBack());
         bottomPanel.add(backButton);
-        bottomPanel.add(closeButton);
-        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+        add(bottomPanel, BorderLayout.SOUTH);
+    }
 
-        setContentPane(mainPanel);
+    protected final void setTopContent(JPanel panel) {
+        contentPanel.add(panel, BorderLayout.NORTH);
+    }
+
+    protected final void initializeFoodsView() {
         loadFoods();
     }
 
@@ -146,7 +145,7 @@ public abstract class MacroFoodsMenu extends JFrame {
     protected void setFavorite(Per100Food food, boolean favorite, String successMessage) {
         try {
             mealController.setPer100FoodFavorite(food.getPer100FoodId(), favorite);
-            JOptionPane.showMessageDialog(this, successMessage, getTitle(), JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, successMessage, title, JOptionPane.INFORMATION_MESSAGE);
             loadFoods();
         } catch (SQLException ex) {
             showErrorMessage("Database error: " + ex.getMessage());
@@ -183,7 +182,7 @@ public abstract class MacroFoodsMenu extends JFrame {
             JOptionPane.showMessageDialog(
                 this,
                 food.getFoodName() + " added to today's meals.",
-                getTitle(),
+                title,
                 JOptionPane.INFORMATION_MESSAGE
             );
         } catch (IllegalArgumentException ex) {
@@ -211,6 +210,6 @@ public abstract class MacroFoodsMenu extends JFrame {
     }
 
     private void showErrorMessage(String message) {
-        JOptionPane.showMessageDialog(this, message, getTitle(), JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
     }
 }

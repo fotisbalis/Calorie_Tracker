@@ -11,7 +11,6 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -21,41 +20,32 @@ import javax.swing.SwingConstants;
 import FotisBalis.CalorieTracker.controller.MealController;
 import FotisBalis.CalorieTracker.model.SavedMeal;
 
-public class SavedMealsMenu extends JFrame {
+public class SavedMealsMenu extends JPanel {
     private final MealController mealController;
     private final JPanel mealsPanel;
 
-    public SavedMealsMenu(JFrame parent) {
+    public SavedMealsMenu(AppNavigator navigator) {
         this.mealController = new MealController();
 
-        setTitle("Saved Meals");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(700, 450);
-        setMinimumSize(new Dimension(700, 450));
-        setLocationRelativeTo(parent);
-
-        JPanel mainPanel = new JPanel(new BorderLayout(12, 12));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+        setLayout(new BorderLayout(12, 12));
+        setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
 
         JLabel titleLabel = new JLabel("Saved Meals", SwingConstants.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
-        mainPanel.add(titleLabel, BorderLayout.NORTH);
+        add(titleLabel, BorderLayout.NORTH);
 
         mealsPanel = new JPanel();
         mealsPanel.setLayout(new BoxLayout(mealsPanel, BoxLayout.Y_AXIS));
 
         JScrollPane scrollPane = new JScrollPane(mealsPanel);
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton closeButton = new JButton("Close");
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(e -> navigator.goBack());
+        bottomPanel.add(backButton);
+        add(bottomPanel, BorderLayout.SOUTH);
 
-        closeButton.addActionListener(e -> dispose());
-
-        bottomPanel.add(closeButton);
-        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
-
-        setContentPane(mainPanel);
         loadSavedMeals();
     }
 
